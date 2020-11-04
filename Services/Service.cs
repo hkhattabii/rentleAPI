@@ -44,10 +44,7 @@ namespace RentleAPI.Services
             insertField(documentDIC, document.GetType().Name);
 
 
-            foreach (string field in mergeFields)
-            {
-                GenerationServices.GenLeaseContract(fileBuilder, field);
-            }
+
 
 
             fileBuilder.Document.Save("Ouoh.docx");

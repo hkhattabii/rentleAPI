@@ -20,14 +20,16 @@ namespace RentleAPI.Services
 
         }
 
-        public List<Property> Find()
+        public List<Property> Find(string type)
         {
             List<Property> properties = new List<Property>();
             var query = (
                 from p in _property.AsQueryable().AsEnumerable()
                 join o in _occupant.AsQueryable() on p.occupantID equals o.ID 
                 into leasedByJoin from leasedBy in leasedByJoin.DefaultIfEmpty()
+                where p.Type == type
                 select new { Property = p, Occupant = leasedBy}).ToList();
+        
             
             for (int i = 0; i < query.Count; i++)
             {
@@ -59,6 +61,19 @@ namespace RentleAPI.Services
         {
             await _property.InsertOneAsync(property);
             return property;
+        }
+
+        public async Task<RentleResponse> Delete(string id) {
+            Property property = await _property.FindOneAndDeleteAsync(p => p.ID == id);
+
+            if (property == null) {
+                return new RentleResponse("Le bien n'éxiste pas", false);
+            }
+
+            await _occupant.DeleteOneAsync(o => o.ID == property.occupantID);
+            await _lease.DeleteOneAsync(l => l.PropertyID == property.ID);
+
+            return new RentleResponse("le bien a été supprimer avec succés", true);
         }
     }
 }

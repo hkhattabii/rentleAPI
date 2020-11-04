@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using System.Collections.Generic;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace RentleAPI.Models
@@ -15,8 +16,6 @@ namespace RentleAPI.Models
 
         public string Type { get; set; }
 
-        public int BedroomCount { get; set; }
-
         public int Size { get; set; }
 
         public int SizeLivingRoom { get; set; }
@@ -29,6 +28,7 @@ namespace RentleAPI.Models
 
         public string Image { get; set; }
 
+        public IEnumerable<int> bedrooms {get; set;}
         public Location Address { get; set; }
 
         [BsonIgnore]

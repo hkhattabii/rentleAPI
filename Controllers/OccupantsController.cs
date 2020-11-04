@@ -21,7 +21,7 @@ namespace RentleAPI.Controllers
         }
 
         [HttpGet]
-        public List<Occupant> GetAll()
+        public List<Occupant> Get()
         {
             return _occupantService.Find();
         }
@@ -31,7 +31,7 @@ namespace RentleAPI.Controllers
             return _occupantService.FindOne(id);
         }
 
-        [HttpDelete("{id}/delete")]
+        [HttpDelete("{id}")]
         public async Task<RentleResponse> Delete(string id) {
             return await _occupantService.Delete(id);
         }
