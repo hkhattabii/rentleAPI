@@ -75,5 +75,10 @@ namespace RentleAPI.Services
 
             return new RentleResponse("le bien a été supprimer avec succés", true);
         }
+
+        public async Task<RentleResponse> Put(Property property) {
+            await _property.ReplaceOneAsync(p => p.ID == property.ID, property);
+            return new RentleResponse("Le bien a été mis à jour", true);
+        }
     }
 }

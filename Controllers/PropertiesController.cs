@@ -18,6 +18,7 @@ namespace RentleAPI.Controllers
             _propertyService = propertyService;
         }
 
+
         [HttpGet("{type}")]
         public List<Property> Get(string type)
         {
@@ -40,6 +41,11 @@ namespace RentleAPI.Controllers
         {
             await _propertyService.Create(property);
             return property;
+        }
+
+        [HttpPut]
+        public async Task<RentleResponse> Put(Property property) {
+            return await _propertyService.Put(property);
         }
     }
 
