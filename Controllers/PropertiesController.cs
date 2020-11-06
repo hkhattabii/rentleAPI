@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using RentleAPI.Models;
 using RentleAPI.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace RentleAPI.Controllers
 {
@@ -37,11 +38,11 @@ namespace RentleAPI.Controllers
             return _propertyService.Delete(id);
         }
         [HttpPost]
-        public async Task<Property> Post(Property property)
+        public async Task<RentleResponse> Post(Property property)
         {
-            await _propertyService.Create(property);
-            return property;
+            return await _propertyService.Create(property);
         }
+
 
         [HttpPut]
         public async Task<RentleResponse> Put(Property property) {

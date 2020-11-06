@@ -57,10 +57,10 @@ namespace RentleAPI.Services
             return property;
         }
         
-        public async Task<Property> Create(Property property)
+        public async Task<RentleResponse> Create(Property property)
         {
             await _property.InsertOneAsync(property);
-            return property;
+            return new RentleResponse("le bien a été insérer avec succès  !", true);
         }
 
         public async Task<RentleResponse> Delete(string id) {
