@@ -32,6 +32,10 @@ namespace RentleAPI.Models
         public Location Address { get; set; }
 
         [BsonIgnore]
+        public int bedroomCount {get;set;}
+        [BsonIgnore]
+        public int sizeBedrooms {get;set;}
+        [BsonIgnore]
         public Occupant leasedBy { get; set; }
         [BsonIgnore]
         public Lease lease {get;set;}

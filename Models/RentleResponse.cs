@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace RentleAPI.Models
 {
-    public class RentleResponse
+    public class RentleResponse 
     {
         public string message {get; set;}
         public bool success {get; set;}
@@ -19,5 +19,14 @@ namespace RentleAPI.Models
             this.success = success;
         }
     }
+
+    public class RentleResponse<T> : RentleResponse {
+        public T data {get; set;}
+        public RentleResponse(string message, bool success, T data) : base(message, success)  {
+            this.data = data;
+        } 
+    }
+
+
 
 }

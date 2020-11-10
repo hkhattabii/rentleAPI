@@ -20,7 +20,28 @@ namespace RentleAPI.Services
 
         }
 
-        public List<Property> Find(string type)
+        public List<Property> Find()
+        {
+            List<Property> properties = new List<Property>();
+            var query = (
+                from p in _property.AsQueryable().AsEnumerable()
+                join o in _occupant.AsQueryable() on p.occupantID equals o.ID 
+                into leasedByJoin from leasedBy in leasedByJoin.DefaultIfEmpty()
+                select new { Property = p, Occupant = leasedBy}).ToList();
+        
+            
+            for (int i = 0; i < query.Count; i++)
+            {
+                Property property = query[i].Property;
+                property.leasedBy = query[i].Occupant;
+                property.bedroomCount = query[i].Property.bedrooms.Count();
+                property.sizeBedrooms = query[i].Property.bedrooms.Sum();
+                properties.Add(property);
+            }
+            
+            return properties;
+        }
+        public List<Property> FindByType(string type)
         {
             List<Property> properties = new List<Property>();
             var query = (
@@ -59,21 +80,27 @@ namespace RentleAPI.Services
         
         public async Task<RentleResponse> Create(Property property)
         {
-            await _property.InsertOneAsync(property);
-            return new RentleResponse("le bien a été insérer avec succès  !", true);
+            try {
+                await _property.InsertOneAsync(property);
+                Property propertyInserted = this.FindOne(property.ID);
+                return new RentleResponse<Property>("le bien a été inséré avec succès  !", true, propertyInserted );
+            } catch {
+                return new RentleResponse("Une erreur interne est survenue", false);
+            }
+ 
         }
 
-        public async Task<RentleResponse> Delete(string id) {
-            Property property = await _property.FindOneAndDeleteAsync(p => p.ID == id);
-
-            if (property == null) {
-                return new RentleResponse("Le bien n'éxiste pas", false);
+        public async Task<RentleResponse> Delete(IEnumerable<string> ids) {
+            Console.WriteLine("Coucou");
+            foreach (string id in ids) {
+                Property property = await _property.FindOneAndDeleteAsync(p => p.ID == id);
+                await _occupant.DeleteOneAsync(o => o.ID == property.occupantID);
+                await _lease.DeleteOneAsync(l => l.PropertyID == property.ID);
             }
 
-            await _occupant.DeleteOneAsync(o => o.ID == property.occupantID);
-            await _lease.DeleteOneAsync(l => l.PropertyID == property.ID);
+            if (ids.Count() == 1) return new RentleResponse("le bien a été supprimer avec succés", true);
 
-            return new RentleResponse("le bien a été supprimer avec succés", true);
+            return new RentleResponse("les bien a été supprimer avec succés", true);
         }
 
         public async Task<RentleResponse> Put(Property property) {

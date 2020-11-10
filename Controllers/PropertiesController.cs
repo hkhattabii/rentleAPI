@@ -19,11 +19,15 @@ namespace RentleAPI.Controllers
             _propertyService = propertyService;
         }
 
+        [HttpGet]
+        public List<Property> Get() {
+            return _propertyService.Find();
+        }
 
         [HttpGet("{type}")]
         public List<Property> Get(string type)
         {
-            return _propertyService.Find(type);
+            return _propertyService.FindByType(type);
         }
         [HttpGet("{type}/{id}")]
         public Property GetById(string id)
@@ -32,10 +36,10 @@ namespace RentleAPI.Controllers
         }
 
 
-        [HttpDelete("{id}")]
-        public Task<RentleResponse> Delete(string id) {
-            Console.WriteLine("Coucou");
-            return _propertyService.Delete(id);
+        [HttpDelete]
+        public Task<RentleResponse> Delete(IEnumerable<string> ids) {
+            Console.WriteLine("OUOH", ids);
+            return _propertyService.Delete(ids);
         }
         [HttpPost]
         public async Task<RentleResponse> Post(Property property)
