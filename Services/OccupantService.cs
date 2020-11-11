@@ -12,11 +12,13 @@ namespace RentleAPI.Services
         public readonly IMongoCollection<Occupant> _occupant;
         private readonly IMongoCollection<Property> _property;
         private readonly IMongoCollection<Lease> _lease;
+        private readonly IMongoCollection<Guarantor> _guarantor;
         public OccupantService(IRentleDatabaseSettings settings) : base(settings)
         {
             _occupant = _database.GetCollection<Occupant>(settings.OccupantCollectionName);
             _property = _database.GetCollection<Property>(settings.PropertyCollectionName);
             _lease = _database.GetCollection<Lease>(settings.LeaseCollectionName);
+            _guarantor = _database.GetCollection<Guarantor>(settings.GuarantorCollectionName);
         }
 
         public List<Occupant> Find()
@@ -24,16 +26,28 @@ namespace RentleAPI.Services
             List<Occupant> occupants = new List<Occupant>();
             var query = (
                 from o in _occupant.AsQueryable().AsEnumerable()
+                join g in _guarantor.AsQueryable() on o.GuarantorID equals g.ID
+                into guarantorJoin from guarantor in guarantorJoin.DefaultIfEmpty()
                 join p in _property.AsQueryable() on o.ID equals p.occupantID
-                select new { Occupant = o, Property = p }
+                into propertyJoin from propertyLeased in propertyJoin.DefaultIfEmpty()
+                join l in _lease.AsQueryable() on o.ID equals l.OccupantID
+                into leaseJoin from lease in leaseJoin.DefaultIfEmpty()
+                select new { Occupant = o,Guarantor = guarantor, Property = propertyLeased, Lease = lease }
             ).ToList();
+
+            
+
 
             for (int i = 0; i < query.Count; i++)
             {
                 Occupant occupant = query[i].Occupant;
+                occupant.Guarantor = query[i].Guarantor;
                 occupant.PropertyLeased = query[i].Property;
+                occupant.Lease = query[i].Lease;
                 occupants.Add(occupant);
             }
+
+            Console.WriteLine(occupants[0].PropertyLeased);
 
             return occupants;
         }
@@ -42,9 +56,11 @@ namespace RentleAPI.Services
             var query =  (
                 from o in _occupant.AsQueryable().AsEnumerable()
                 join p in _property.AsQueryable() on o.ID equals p.occupantID
+                into propertyJoin from propertyLeased in propertyJoin.DefaultIfEmpty()
                 join l in _lease.AsQueryable() on o.ID equals l.OccupantID
+                into leaseJoin from lease in leaseJoin.DefaultIfEmpty()
                 where o.ID == id
-                select new { Occupant = o, Property = p, Lease = l}
+                select new { Occupant = o, Property = propertyLeased, Lease = lease}
             ).Single();
 
             Occupant occupant = query.Occupant;
@@ -55,7 +71,8 @@ namespace RentleAPI.Services
         public async Task<RentleResponse> Create(Occupant occupant)
         {
             await _occupant.InsertOneAsync(occupant); //Insertion d'un locataire
-            await _property.UpdateOneAsync(p => p.ID == occupant.PropertyID, Builders<Property>.Update.Set(p => p.occupantID, occupant.ID)); //Met à jour la table du bien
+            Occupant occupantInserted = FindOne(occupant.ID);
+            //await _property.UpdateOneAsync(p => p.ID == occupant.PropertyID, Builders<Property>.Update.Set(p => p.occupantID, occupant.ID)); //Met à jour la table du bien
 
 
             /*
@@ -66,7 +83,7 @@ namespace RentleAPI.Services
             */
             
 
-            return new RentleResponse("Le locataire a bien été ajouté", true);
+            return new RentleResponse<Occupant>("Le locataire a bien été ajouté", true, occupantInserted);
         }
 
         public async Task<RentleResponse> Delete(string id) {

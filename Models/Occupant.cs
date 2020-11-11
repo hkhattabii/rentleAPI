@@ -44,6 +44,8 @@ namespace RentleAPI.Models
         public Lease Lease {get; set;}
 
         [BsonIgnore]
+        public Guarantor Guarantor {get; set;}
+        [BsonIgnore]
         public Property PropertyLeased { get; set; }
         
 
