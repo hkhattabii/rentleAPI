@@ -99,7 +99,7 @@ namespace RentleAPI.Services
 
             if (ids.Count() == 1) return new RentleResponse("le bien a été supprimer avec succés", true);
 
-            return new RentleResponse("les biens a été supprimer avec succés", true);
+            return new RentleResponse("les biens ont été supprimer avec succés", true);
         }
 
         public async Task<RentleResponse> Put(Property property) {

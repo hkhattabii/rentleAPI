@@ -32,10 +32,10 @@ namespace RentleAPI.Services
                 into propertyJoin from propertyLeased in propertyJoin.DefaultIfEmpty()
                 join l in _lease.AsQueryable() on o.ID equals l.OccupantID
                 into leaseJoin from lease in leaseJoin.DefaultIfEmpty()
-                select new { Occupant = o,Guarantor = guarantor, Property = propertyLeased, Lease = lease }
+                select new { Occupant = o, Guarantor = guarantor, Property = propertyLeased, Lease = lease }
             ).ToList();
 
-            
+
 
 
             for (int i = 0; i < query.Count; i++)
@@ -47,20 +47,21 @@ namespace RentleAPI.Services
                 occupants.Add(occupant);
             }
 
-            Console.WriteLine(occupants[0].PropertyLeased);
-
             return occupants;
         }
 
-        public Occupant FindOne(string id) {
-            var query =  (
+        public Occupant FindOne(string id)
+        {
+            var query = (
                 from o in _occupant.AsQueryable().AsEnumerable()
+                join g in _guarantor.AsQueryable() on o.GuarantorID equals g.ID
+                into guarantorJoin from guarantor in guarantorJoin.DefaultIfEmpty()
                 join p in _property.AsQueryable() on o.ID equals p.occupantID
                 into propertyJoin from propertyLeased in propertyJoin.DefaultIfEmpty()
                 join l in _lease.AsQueryable() on o.ID equals l.OccupantID
                 into leaseJoin from lease in leaseJoin.DefaultIfEmpty()
                 where o.ID == id
-                select new { Occupant = o, Property = propertyLeased, Lease = lease}
+                select new { Occupant = o, Property = propertyLeased, Lease = lease }
             ).Single();
 
             Occupant occupant = query.Occupant;
@@ -81,22 +82,29 @@ namespace RentleAPI.Services
             
             await _lease.InsertOneAsync(occupant.Lease); //Insertion d'un bail
             */
-            
+
 
             return new RentleResponse<Occupant>("Le locataire a bien été ajouté", true, occupantInserted);
         }
 
-        public async Task<RentleResponse> Delete(string id) {
-            Occupant occupant = await _occupant.FindOneAndDeleteAsync(o => o.ID == id);
-            
-            if (occupant == null) {
-                return new RentleResponse("Le locataire n'éxiste pas", false);
+        public async Task<RentleResponse> Delete(IEnumerable<string> ids)
+        {
+            foreach (string id in ids)
+            {
+                Occupant occupant = await _occupant.FindOneAndDeleteAsync(o => o.ID == id);
+                await _guarantor.DeleteOneAsync(g => g.ID == occupant.GuarantorID);
             }
 
-            await _property.UpdateOneAsync(p => p.ID == occupant.PropertyID, Builders<Property>.Update.Set(p => p.occupantID, null));
-            await _lease.DeleteManyAsync(l => l.OccupantID == occupant.ID);
+            if (ids.Count() == 1) return new RentleResponse("Le locataire a été supprimer avec succés", true);
+            return new RentleResponse("Les locataires ont bien été supprimé avec succés", true);
 
-            return new RentleResponse("Le locataire a bien été supprimé", true);
+        }
+
+        public async Task<RentleResponse> Put(Occupant occupant)
+        {
+            await _occupant.ReplaceOneAsync(o => o.ID == occupant.ID, occupant);
+            Occupant occupantInserted = FindOne(occupant.ID);
+            return new RentleResponse<Occupant>("Le bien a été mis à jour", true, occupantInserted);
         }
     }
 }

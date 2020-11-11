@@ -26,16 +26,21 @@ namespace RentleAPI.Controllers
             return _occupantService.Find();
         }
 
-        [HttpGet("{id}")]
-        public Occupant GetById(string id) {
-            return _occupantService.FindOne(id);
+        [HttpPost]
+        public async Task<RentleResponse> Post(Occupant occupant)
+        {
+            return await _occupantService.Create(occupant);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<RentleResponse> Delete(string id) {
-            return await _occupantService.Delete(id);
+        [HttpPut]
+        public async Task<RentleResponse> Put(Occupant occupant) {
+            return await _occupantService.Put(occupant);
         }
 
+        [HttpDelete()]
+        public async Task<RentleResponse> Delete(IEnumerable<string> ids) {
+            return await _occupantService.Delete(ids);
+        }
 
         [HttpGet("{id}/generateDoc/{docType}")]
         public object generateDocument(string id, string docType)
@@ -47,10 +52,5 @@ namespace RentleAPI.Controllers
 
 
 
-        [HttpPost]
-        public async Task<RentleResponse> Post(Occupant occupant)
-        {
-            return await _occupantService.Create(occupant);
-        }
     }
 }
