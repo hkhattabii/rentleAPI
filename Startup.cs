@@ -24,6 +24,7 @@ namespace RentleAPI
             services.Configure<RentleDatabaseSettings>(Configuration.GetSection(nameof (RentleDatabaseSettings)));
             services.AddSingleton<IRentleDatabaseSettings>(sp => sp.GetRequiredService<IOptions<RentleDatabaseSettings>>().Value);
             services.AddSingleton<PropertyService>();
+            services.AddSingleton<GuarantorService>();
             services.AddSingleton<OccupantService>();
             services.AddSingleton<LeaseService>();
             services.AddControllers();

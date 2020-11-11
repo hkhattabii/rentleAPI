@@ -82,7 +82,7 @@ namespace RentleAPI.Services
         {
             try {
                 await _property.InsertOneAsync(property);
-                Property propertyInserted = this.FindOne(property.ID);
+                Property propertyInserted =FindOne(property.ID);
                 return new RentleResponse<Property>("le bien a été inséré avec succès  !", true, propertyInserted );
             } catch {
                 return new RentleResponse("Une erreur interne est survenue", false);
@@ -91,7 +91,6 @@ namespace RentleAPI.Services
         }
 
         public async Task<RentleResponse> Delete(IEnumerable<string> ids) {
-            Console.WriteLine("Coucou");
             foreach (string id in ids) {
                 Property property = await _property.FindOneAndDeleteAsync(p => p.ID == id);
                 await _occupant.DeleteOneAsync(o => o.ID == property.occupantID);
@@ -100,12 +99,13 @@ namespace RentleAPI.Services
 
             if (ids.Count() == 1) return new RentleResponse("le bien a été supprimer avec succés", true);
 
-            return new RentleResponse("les bien a été supprimer avec succés", true);
+            return new RentleResponse("les biens a été supprimer avec succés", true);
         }
 
         public async Task<RentleResponse> Put(Property property) {
             await _property.ReplaceOneAsync(p => p.ID == property.ID, property);
-            return new RentleResponse("Le bien a été mis à jour", true);
+            Property propertyInserted = this.FindOne(property.ID);
+            return new RentleResponse<Property>("Le bien a été mis à jour", true, propertyInserted);
         }
     }
 }
