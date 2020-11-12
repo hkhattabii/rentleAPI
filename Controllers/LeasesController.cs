@@ -36,5 +36,10 @@ namespace RentleAPI.Controllers
         public async Task<RentleResponse> Put(Lease lease) {
             return await _leaseService.Put(lease);
         }
+
+        [HttpDelete]
+        public async Task<RentleResponse> Delete(IEnumerable<string> ids) {
+            return await _leaseService.Delete(ids);
+        }
     }
 }

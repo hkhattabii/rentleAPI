@@ -73,16 +73,6 @@ namespace RentleAPI.Services
         {
             await _occupant.InsertOneAsync(occupant); //Insertion d'un locataire
             Occupant occupantInserted = FindOne(occupant.ID);
-            //await _property.UpdateOneAsync(p => p.ID == occupant.PropertyID, Builders<Property>.Update.Set(p => p.occupantID, occupant.ID)); //Met à jour la table du bien
-
-
-            /*
-            occupant.Lease.PropertyID = occupant.PropertyID;
-            occupant.Lease.OccupantID = occupant.ID;
-            
-            await _lease.InsertOneAsync(occupant.Lease); //Insertion d'un bail
-            */
-
 
             return new RentleResponse<Occupant>("Le locataire a bien été ajouté", true, occupantInserted);
         }

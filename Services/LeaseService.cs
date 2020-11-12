@@ -74,7 +74,6 @@ namespace RentleAPI.Services
             }
 
         }
-
         public async Task<RentleResponse> Put(Lease lease) {
             try {
                 await _lease.ReplaceOneAsync(l => l.ID == lease.ID, lease);
@@ -83,6 +82,18 @@ namespace RentleAPI.Services
             } catch {
                 return new RentleResponse("Une erreur interne est survenue", false);
             }
+        }
+
+        public async Task<RentleResponse> Delete(IEnumerable<string> ids)
+        {
+            foreach (string id in ids)
+            {
+                Lease lease = await _lease.FindOneAndDeleteAsync(l => l.ID == id);
+            }
+
+            if (ids.Count() == 1) return new RentleResponse("Le bail a été supprimer avec succés", true);
+            return new RentleResponse("Les baux ont bien été supprimé avec succés", true);
+
         }
     }
 }
