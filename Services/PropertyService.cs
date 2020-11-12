@@ -82,7 +82,8 @@ namespace RentleAPI.Services
         {
             try {
                 await _property.InsertOneAsync(property);
-                Property propertyInserted =FindOne(property.ID);
+                await _occupant.UpdateOneAsync(o => o.ID == property.occupantID, Builders<Occupant>.Update.Set(o => o.PropertyID, property.ID));
+                Property propertyInserted = FindOne(property.ID);
                 return new RentleResponse<Property>("le bien a été inséré avec succès  !", true, propertyInserted );
             } catch {
                 return new RentleResponse("Une erreur interne est survenue", false);

@@ -28,6 +28,12 @@ namespace RentleAPI.Models
 
         public DateTime SignatureDate { get; set; }
 
+
+
+        [BsonIgnore]
+        public float warranty {get; set;}
+        [BsonIgnore]
+        public bool isDepositPaid {get; set;} 
         public DateTime? DepositDate { get; set; }
 
         public float Index { get; set; }

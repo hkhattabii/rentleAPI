@@ -26,15 +26,15 @@ namespace RentleAPI.Controllers
             return _leaseService.Find();
         }
 
-        [HttpGet("{id}")]
-        public Lease Get(string id)
-        {
-            return _leaseService.FindOne(id);
-        }
         [HttpPost]
-        public async Task<Lease> Post(Lease lease)
+        public async Task<RentleResponse> Post(Lease lease)
         {
             return await _leaseService.Create(lease);
+        }
+
+        [HttpPut]
+        public async Task<RentleResponse> Put(Lease lease) {
+            return await _leaseService.Put(lease);
         }
     }
 }
