@@ -23,7 +23,13 @@ namespace RentleAPI.Controllers
         [HttpGet]
         public List<Occupant> Get()
         {
-            return _occupantService.Find();
+            return _occupantService.Find(false);
+        }
+
+        [HttpGet("withoutLease")]
+        public List<Occupant> GetWithoutLease()
+        {
+            return _occupantService.Find(true);
         }
 
         [HttpPost]
@@ -45,9 +51,12 @@ namespace RentleAPI.Controllers
         [HttpGet("{id}/generateDoc/{docType}")]
         public object generateDocument(string id, string docType)
         {
+            return null;
+            /*
             Occupant occupant = _occupantService.Find().FirstOrDefault();
             _occupantService.generateDocument<Occupant>(DOC_TYPE.LEASE_CONTRACT, occupant, "1");
             return new { success = true, message = "Coucou"};
+            */
         }
 
 

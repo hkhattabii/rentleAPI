@@ -7,6 +7,13 @@ using System.Threading.Tasks;
 
 namespace RentleAPI.Services
 {
+    public class OccupantJoined
+    {
+        public Occupant Occupant { get; set; }
+        public Guarantor Guarantor { get; set; }
+        public Property Property { get; set; }
+        public Lease? Lease { get; set; }
+    }
     public class OccupantService : Service
     {
         public readonly IMongoCollection<Occupant> _occupant;
@@ -21,29 +28,44 @@ namespace RentleAPI.Services
             _guarantor = _database.GetCollection<Guarantor>(settings.GuarantorCollectionName);
         }
 
-        public List<Occupant> Find()
+        private IEnumerable<OccupantJoined> Join()
         {
-            List<Occupant> occupants = new List<Occupant>();
-            var query = (
+            IEnumerable<OccupantJoined> query = (
                 from o in _occupant.AsQueryable().AsEnumerable()
                 join g in _guarantor.AsQueryable() on o.GuarantorID equals g.ID
-                into guarantorJoin from guarantor in guarantorJoin.DefaultIfEmpty()
+                into guarantorJoin
+                from guarantor in guarantorJoin.DefaultIfEmpty()
                 join p in _property.AsQueryable() on o.ID equals p.occupantID
-                into propertyJoin from propertyLeased in propertyJoin.DefaultIfEmpty()
+                into propertyJoin
+                from propertyLeased in propertyJoin.DefaultIfEmpty()
                 join l in _lease.AsQueryable() on o.ID equals l.OccupantID
-                into leaseJoin from lease in leaseJoin.DefaultIfEmpty()
-                select new { Occupant = o, Guarantor = guarantor, Property = propertyLeased, Lease = lease }
-            ).ToList();
+                into leaseJoin
+                from lease in leaseJoin.DefaultIfEmpty()
+                select new OccupantJoined { Occupant = o, Guarantor = guarantor, Property = propertyLeased, Lease = lease }
+            );
 
+            return query;
+        }
 
+        public List<Occupant> Find(bool withoutLease)
+        {
+            List<Occupant> occupants = new List<Occupant>();
+            IEnumerable<OccupantJoined> query = Join();
 
-
-            for (int i = 0; i < query.Count; i++)
+            if (withoutLease)
             {
-                Occupant occupant = query[i].Occupant;
-                occupant.Guarantor = query[i].Guarantor;
-                occupant.PropertyLeased = query[i].Property;
-                occupant.Lease = query[i].Lease;
+                query = query.Where(q => {
+                    return q.Lease == null;
+                });
+            }
+            List<OccupantJoined> queryList = query.ToList();
+
+            for (int i = 0; i < queryList.Count; i++)
+            {
+                Occupant occupant = queryList[i].Occupant;
+                occupant.Guarantor = queryList[i].Guarantor;
+                occupant.PropertyLeased = queryList[i].Property;
+                occupant.Lease = queryList[i].Lease;
                 occupants.Add(occupant);
             }
 
@@ -52,23 +74,16 @@ namespace RentleAPI.Services
 
         public Occupant FindOne(string id)
         {
-            var query = (
-                from o in _occupant.AsQueryable().AsEnumerable()
-                join g in _guarantor.AsQueryable() on o.GuarantorID equals g.ID
-                into guarantorJoin from guarantor in guarantorJoin.DefaultIfEmpty()
-                join p in _property.AsQueryable() on o.ID equals p.occupantID
-                into propertyJoin from propertyLeased in propertyJoin.DefaultIfEmpty()
-                join l in _lease.AsQueryable() on o.ID equals l.OccupantID
-                into leaseJoin from lease in leaseJoin.DefaultIfEmpty()
-                where o.ID == id
-                select new { Occupant = o, Property = propertyLeased, Lease = lease }
-            ).Single();
+            var query = Join().Where(q =>  q.Occupant.ID == id).FirstOrDefault();
 
             Occupant occupant = query.Occupant;
             occupant.PropertyLeased = query.Property;
             occupant.Lease = query.Lease;
             return occupant;
         }
+
+
+
         public async Task<RentleResponse> Create(Occupant occupant)
         {
             await _occupant.InsertOneAsync(occupant); //Insertion d'un locataire

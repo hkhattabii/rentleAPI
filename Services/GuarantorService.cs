@@ -8,7 +8,11 @@ using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Bson;
 
 namespace RentleAPI.Services
-{
+{ 
+    public class GuarantorJoined {
+        public Guarantor Guarantor { get; set; }
+        public Occupant Occupant { get; set; }
+    }
     public class GuarantorService : Service
     {
         public readonly IMongoCollection<Occupant> _occupant;
@@ -22,16 +26,23 @@ namespace RentleAPI.Services
             _property = _database.GetCollection<Property>(settings.PropertyCollectionName);
         }
 
+        public IEnumerable<GuarantorJoined> Join()
+        {
+            IEnumerable<GuarantorJoined> query = (
+                from g in _guarantor.AsQueryable().AsEnumerable()
+                join o in _occupant.AsQueryable() on g.ID equals o.GuarantorID
+                into occupantJoin
+                from occupant in occupantJoin.DefaultIfEmpty()
+                select new GuarantorJoined { Guarantor = g, Occupant = occupant });
+
+            return query;
+        }
+
         public List<Guarantor> Find()
         {
 
             List<Guarantor> guarantors = new List<Guarantor>();
-            var query = (
-                from g in _guarantor.AsQueryable().AsEnumerable()
-                join o in _occupant.AsQueryable() on g.ID equals o.GuarantorID
-                into occupantJoin from occupant in occupantJoin.DefaultIfEmpty()
-                select new { Guarantor = g, Occupant = occupant }
-            ).ToList();
+            var query = Join().ToList();
 
             for (int i = 0; i < query.Count; i++)
             {
@@ -44,15 +55,8 @@ namespace RentleAPI.Services
         }
 
         public Guarantor FindOne(string id) {
-            var query = (
-                from g in _guarantor.AsQueryable().AsEnumerable()
-                join o in _occupant.AsQueryable() on g.ID equals o.GuarantorID
-                into occupantJoin from occupant in occupantJoin.DefaultIfEmpty()
-                where g.ID == id
-                select new { Guarantor = g, Occupant = occupant }
-            ).FirstOrDefault();
-
-
+            var query = Join().Where(q => q.Guarantor.ID == id).FirstOrDefault();
+                
             Guarantor guarantor = query.Guarantor;
             guarantor.Occupant = query.Occupant;
 

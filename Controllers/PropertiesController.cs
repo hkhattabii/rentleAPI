@@ -24,21 +24,8 @@ namespace RentleAPI.Controllers
             return _propertyService.Find();
         }
 
-        [HttpGet("{type}")]
-        public List<Property> Get(string type)
-        {
-            return _propertyService.FindByType(type);
-        }
-        [HttpGet("{type}/{id}")]
-        public Property GetById(string id)
-        {
-            return _propertyService.FindOne(id);
-        }
-
-
         [HttpDelete]
         public Task<RentleResponse> Delete(IEnumerable<string> ids) {
-            Console.WriteLine("OUOH", ids);
             return _propertyService.Delete(ids);
         }
         [HttpPost]

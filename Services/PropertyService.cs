@@ -7,6 +7,11 @@ using System.Threading.Tasks;
 
 namespace RentleAPI.Services
 {
+    public class PropertyJoined
+    {
+        public Property Property { get; set; }
+        public Occupant Occupant { get; set; }
+    }
     public class PropertyService : Service
     {
         private readonly IMongoCollection<Property> _property;
@@ -20,42 +25,25 @@ namespace RentleAPI.Services
 
         }
 
+        public IEnumerable<PropertyJoined> Join()
+        {
+            IEnumerable<PropertyJoined> query = (
+                from p in _property.AsQueryable().AsEnumerable()
+                join o in _occupant.AsQueryable() on p.occupantID equals o.ID
+                into leasedByJoin
+                from leasedBy in leasedByJoin.DefaultIfEmpty()
+                select new PropertyJoined { Property = p, Occupant = leasedBy });
+            return query;
+        }
+
         public List<Property> Find()
         {
             List<Property> properties = new List<Property>();
-            var query = (
-                from p in _property.AsQueryable().AsEnumerable()
-                join o in _occupant.AsQueryable() on p.occupantID equals o.ID 
-                into leasedByJoin from leasedBy in leasedByJoin.DefaultIfEmpty()
-                select new { Property = p, Occupant = leasedBy}).ToList();
-        
+            List<PropertyJoined> query = Join().ToList();
             
             for (int i = 0; i < query.Count; i++)
             {
-                Property property = query[i].Property;
-                property.leasedBy = query[i].Occupant;
-                property.bedroomCount = query[i].Property.bedrooms.Count();
-                property.sizeBedrooms = query[i].Property.bedrooms.Sum();
-                properties.Add(property);
-            }
-            
-            return properties;
-        }
-        public List<Property> FindByType(string type)
-        {
-            List<Property> properties = new List<Property>();
-            var query = (
-                from p in _property.AsQueryable().AsEnumerable()
-                join o in _occupant.AsQueryable() on p.occupantID equals o.ID 
-                into leasedByJoin from leasedBy in leasedByJoin.DefaultIfEmpty()
-                where p.Type == type
-                select new { Property = p, Occupant = leasedBy}).ToList();
-        
-            
-            for (int i = 0; i < query.Count; i++)
-            {
-                Property property = query[i].Property;
-                property.leasedBy = query[i].Occupant;
+                Property property = computeFields(query[i]);
                 properties.Add(property);
             }
             
@@ -64,17 +52,9 @@ namespace RentleAPI.Services
 
         public Property FindOne(string id)
         {
-            var query = (
-                from p in _property.AsQueryable().AsEnumerable() 
-                join o in _occupant.AsQueryable() on p.ID equals o.PropertyID
-                into leasedByJoin from leasedBy in leasedByJoin.DefaultIfEmpty()
-                join l in _lease.AsQueryable() on p.ID equals l.PropertyID
-                into leaseJoin from lease in leaseJoin.DefaultIfEmpty()
-                where p.ID == id 
-                select new { Property = p, Occupant = leasedBy, Lease = lease  }).FirstOrDefault();
-            Property property = query.Property;
-            property.leasedBy = query.Occupant;
-            property.lease = query.Lease;
+            PropertyJoined query = Join().Where(q => q.Property.ID == id).FirstOrDefault();
+
+            Property property = computeFields(query);
             return property;
         }
         
@@ -107,6 +87,15 @@ namespace RentleAPI.Services
             await _property.ReplaceOneAsync(p => p.ID == property.ID, property);
             Property propertyInserted = this.FindOne(property.ID);
             return new RentleResponse<Property>("Le bien a été mis à jour", true, propertyInserted);
+        }
+
+        public Property computeFields(PropertyJoined query)
+        {
+            Property property = query.Property;
+            property.leasedBy = query.Occupant;
+            property.bedroomCount = query.Property.bedrooms.Count();
+            property.sizeBedrooms = query.Property.bedrooms.Sum();
+            return property;
         }
     }
 }

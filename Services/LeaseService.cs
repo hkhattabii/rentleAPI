@@ -46,7 +46,6 @@ namespace RentleAPI.Services
         public List<Lease> FindAlarms(DateTime now)
         {
 
-            Console.WriteLine(now);
             List<Lease> leases = new List<Lease>();
             
 
@@ -93,6 +92,7 @@ namespace RentleAPI.Services
 
 
 
+
         public async Task<RentleResponse> Create(Lease lease)
         {
             try {
@@ -127,20 +127,6 @@ namespace RentleAPI.Services
 
         }
 
-        public void Send()
-        {
-            var timer = new System.Timers.Timer();
-            timer.Interval = 2000;
-            timer.Elapsed += onTimerEvent;
-            timer.AutoReset = true;
-            timer.Enabled = true;
-
-        }
-
-        private static void onTimerEvent(Object source, System.Timers.ElapsedEventArgs e)
-        {
-            Console.WriteLine("Coucou");
-        }
     }
 }
 
