@@ -38,7 +38,7 @@ namespace RentleAPI.Services
                 lease.Property = query[i].Property;
                 lease.Occupant = query[i].Occupant;
                 lease.warranty = query[i].Property.Price * 2;
-                lease.IsFirthMonthPaid = query[i].Lease.DepositDate == null ? false : true;
+                lease.IsFirstMonthPaid = query[i].Lease.DepositDate == null ? false : true;
                 leases.Add(lease);
             }
             return leases;
@@ -58,7 +58,7 @@ namespace RentleAPI.Services
             lease.Property = query.Property;
             lease.Occupant = query.Occupant;
             lease.warranty = query.Property.Price * 2;
-            lease.IsFirthMonthPaid = query.Lease.DepositDate == null ? false : true;
+            lease.isDepositPaid = query.Lease.DepositDate == null ? false : true;
             return lease;
         }
 

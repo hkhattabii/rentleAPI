@@ -37,7 +37,7 @@ namespace RentleAPI.Models
         public DateTime? DepositDate { get; set; }
 
         public float Index { get; set; }
-        public bool IsFirthMonthPaid { get; set; }
+        public bool IsFirstMonthPaid { get; set; }
 
         public Meter gasMeter {get; set;}
         public Meter waterMeter {get; set;}
