@@ -36,3 +36,4 @@ C:\Users\hkhattabi\Desktop\COURS\Q5\WEB\PROJET\rentleAPI\bin\Debug\netcoreapp3.1
 C:\Users\hkhattabi\Desktop\COURS\Q5\WEB\PROJET\rentleAPI\bin\Debug\netcoreapp3.1\runtimes\win-arm64\native\libSkiaSharp.dll
 C:\Users\hkhattabi\Desktop\COURS\Q5\WEB\PROJET\rentleAPI\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\libSkiaSharp.dll
 C:\Users\hkhattabi\Desktop\COURS\Q5\WEB\PROJET\rentleAPI\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\libSkiaSharp.dll
+C:\Users\hkhattabi\Desktop\COURS\Q5\WEB\PROJET\rentleAPI\bin\Debug\netcoreapp3.1\System.Net.WebSockets.WebSocketProtocol.dll

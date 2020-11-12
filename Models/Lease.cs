@@ -42,6 +42,7 @@ namespace RentleAPI.Models
         public Meter gasMeter {get; set;}
         public Meter waterMeter {get; set;}
         public Meter electricityMeter {get; set;}
+        public DateTime? alarmDate { get; set; }
 
         [BsonIgnore]
         public Property Property { get; set; }

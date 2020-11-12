@@ -27,6 +27,7 @@ namespace RentleAPI
             services.AddSingleton<GuarantorService>();
             services.AddSingleton<OccupantService>();
             services.AddSingleton<LeaseService>();
+            services.AddSignalR();
             services.AddControllers();
         }
 
