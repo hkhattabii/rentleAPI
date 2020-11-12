@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +29,7 @@ namespace RentleAPI
             services.AddSingleton<OccupantService>();
             services.AddSingleton<LeaseService>();
             services.AddSignalR();
+            services.AddHostedService<AlarmService>();
             services.AddControllers();
         }
 
@@ -53,6 +55,7 @@ namespace RentleAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<AlarmHub>("/alarm");
             });
         }
     }

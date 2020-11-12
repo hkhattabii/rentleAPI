@@ -33,6 +33,11 @@ namespace RentleAPI.Services
             mergeValues = new List<object>();
         }
 
+        public IMongoDatabase getDatabase()
+        {
+            return _database;
+        } 
+
         public void generateDocument<T>(DOC_TYPE docType, T document, string id)
         {
             string filename = docType.ToString() + id + ".docx";
