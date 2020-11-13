@@ -21,7 +21,13 @@ namespace RentleAPI.Controllers
 
         [HttpGet]
         public List<Property> Get() {
-            return _propertyService.Find();
+            return _propertyService.Find(false);
+        }
+
+        [HttpGet("withoutLease")]
+        public List<Property> withhoutOccupant(bool withhoutLease)
+        {
+            return _propertyService.Find(true);
         }
 
         [HttpDelete]

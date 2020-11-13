@@ -37,14 +37,20 @@ namespace RentleAPI.Services
             return query;
         }
 
-        public List<Property> Find()
+        public List<Property> Find(bool withoutLease)
         {
             List<Property> properties = new List<Property>();
-            List<PropertyJoined> query = Join().ToList();
+            IEnumerable<PropertyJoined> query = Join();
+
+            if (withoutLease) {
+                query = query.Where(q => q.Occupant == null);
+            }
             
-            for (int i = 0; i < query.Count; i++)
+            List<PropertyJoined> queryList = query.ToList();
+
+            for (int i = 0; i < queryList.Count; i++)
             {
-                Property property = computeFields(query[i]);
+                Property property = computeFields(queryList[i]);
                 properties.Add(property);
             }
             

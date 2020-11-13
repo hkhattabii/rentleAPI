@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace RentleAPI.Services
 {
+    public class LeaseJoined {
+        public Lease Lease {get; set;}
+        public Property Property {get; set;}
+        public Occupant Occupant {get ;set;}
+    }
     public class LeaseService : Service
     {
         private readonly IMongoCollection<Lease> _lease;
@@ -21,14 +26,22 @@ namespace RentleAPI.Services
         }
 
 
-        public List<Lease> Find()
-        {
-            var query = (
+        public IEnumerable<LeaseJoined> Join() {
+            IEnumerable<LeaseJoined> query = (
                 from l in _lease.AsQueryable().AsEnumerable()
                 join p in _property.AsQueryable() on l.PropertyID equals p.ID
                 join o in _occupant.AsQueryable() on l.OccupantID equals o.ID
-                select new { Lease = l, Property = p, Occupant = o }
-            ).ToList();
+                select new LeaseJoined { Lease = l, Property = p, Occupant = o }
+            );
+
+            return query;
+        }
+
+        public List<Lease> Find(bool withouLease)
+        {
+            List<LeaseJoined> query = Join().ToList();
+
+    
 
             List<Lease> leases = new List<Lease>();
             for (int i = 0; i < query.Count; i++)

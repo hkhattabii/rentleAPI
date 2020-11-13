@@ -20,7 +20,7 @@ namespace RentleAPI.Controllers
         [HttpGet]
         public List<Lease> Get()
         {
-            return _leaseService.Find();
+            return _leaseService.Find(false);
         }
 
         [HttpPost]
