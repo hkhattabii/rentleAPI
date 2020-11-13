@@ -23,7 +23,13 @@ namespace RentleAPI.Controllers
         [HttpGet]
         public List<Guarantor> Get()
         {
-            return  _guarantor.Find();
+            return  _guarantor.Find(false);
+        }
+
+        [HttpGet("withoutOccupant")]
+        public List<Guarantor> withhoutOccupant()
+        {
+            return _guarantor.Find(true);
         }
 
         [HttpDelete]

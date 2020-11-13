@@ -9,9 +9,6 @@ namespace RentleAPI.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string ID { get; set; }
-        [BsonRepresentation(BsonType.ObjectId)]
-         public string? occupantID { get; set; }
-
         public int FloorNumber { get; set; }
 
         public string Type { get; set; }
@@ -37,7 +34,5 @@ namespace RentleAPI.Models
         public int sizeBedrooms {get;set;}
         [BsonIgnore]
         public Occupant leasedBy { get; set; }
-        [BsonIgnore]
-        public Lease lease {get;set;}
     }
 }

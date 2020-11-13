@@ -29,9 +29,10 @@ namespace RentleAPI.Services
         {
             IEnumerable<PropertyJoined> query = (
                 from p in _property.AsQueryable().AsEnumerable()
-                join o in _occupant.AsQueryable() on p.occupantID equals o.ID
-                into leasedByJoin
-                from leasedBy in leasedByJoin.DefaultIfEmpty()
+                join l in _lease.AsQueryable() on p.ID equals l.PropertyID
+                into leaseJoin from lease in leaseJoin.DefaultIfEmpty()
+                join o in _occupant.AsQueryable() on lease?.OccupantID equals o.ID
+                into leasedByJoin from leasedBy in leasedByJoin.DefaultIfEmpty()
                 select new PropertyJoined { Property = p, Occupant = leasedBy });
             return query;
         }
@@ -62,7 +63,6 @@ namespace RentleAPI.Services
         {
             try {
                 await _property.InsertOneAsync(property);
-                await _occupant.UpdateOneAsync(o => o.ID == property.occupantID, Builders<Occupant>.Update.Set(o => o.PropertyID, property.ID));
                 Property propertyInserted = FindOne(property.ID);
                 return new RentleResponse<Property>("le bien a été inséré avec succès  !", true, propertyInserted );
             } catch {
@@ -74,8 +74,9 @@ namespace RentleAPI.Services
         public async Task<RentleResponse> Delete(IEnumerable<string> ids) {
             foreach (string id in ids) {
                 Property property = await _property.FindOneAndDeleteAsync(p => p.ID == id);
-                await _occupant.DeleteOneAsync(o => o.ID == property.occupantID);
-                await _lease.DeleteOneAsync(l => l.PropertyID == property.ID);
+                Lease leaseDeleted = await _lease.FindOneAndDeleteAsync(l => l.PropertyID == property.ID);
+                await _occupant.DeleteOneAsync(o => o.ID == leaseDeleted.OccupantID);
+                
             }
 
             if (ids.Count() == 1) return new RentleResponse("le bien a été supprimer avec succés", true);

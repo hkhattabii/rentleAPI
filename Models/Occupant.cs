@@ -19,8 +19,6 @@ namespace RentleAPI.Models
     }
 
     public class Guarantor : Person {
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string? OccupantID { get; set; }
 
         [BsonIgnore]
         public Occupant Occupant { get; set; }

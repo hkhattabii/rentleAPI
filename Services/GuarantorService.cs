@@ -38,16 +38,24 @@ namespace RentleAPI.Services
             return query;
         }
 
-        public List<Guarantor> Find()
+        public List<Guarantor> Find(bool withoutOccupant)
         {
 
             List<Guarantor> guarantors = new List<Guarantor>();
-            var query = Join().ToList();
+            IEnumerable<GuarantorJoined> query = Join();
 
-            for (int i = 0; i < query.Count; i++)
+
+            if (withoutOccupant) {
+
+                query = query.Where(q => q.Occupant == null);
+            }
+
+            List<GuarantorJoined> queryList = query.ToList();
+
+            for (int i = 0; i < queryList.Count; i++)
             {
-                Guarantor guarantor = query[i].Guarantor;
-                guarantor.Occupant = query[i].Occupant;
+                Guarantor guarantor = queryList[i].Guarantor;
+                guarantor.Occupant = queryList[i].Occupant;
                 guarantors.Add(guarantor);
             }
 
@@ -67,7 +75,7 @@ namespace RentleAPI.Services
             try {
                 await _guarantor.InsertOneAsync(guarantor);
                 Guarantor guarantorInserted = FindOne(guarantor.ID);
-                return new RentleResponse<Guarantor>("Le guarant a bien été ajouté", true, guarantorInserted);
+                return new RentleResponse<Guarantor>("Le guarant a bien Ã©tÃ© ajoutÃ©", true, guarantorInserted);
             } catch
             {
                 return new RentleResponse("Une erreur interne est survenue", false);
@@ -80,20 +88,19 @@ namespace RentleAPI.Services
             foreach (string id in ids)
             {
                 Guarantor guarantor = await _guarantor.FindOneAndDeleteAsync(g => g.ID == id);
-                await _occupant.DeleteOneAsync(o => o.ID == guarantor.OccupantID);
-                await _property.DeleteOneAsync(p => p.occupantID == guarantor.OccupantID);
+                await _occupant.UpdateOneAsync(o => o.ID == guarantor.ID, Builders<Occupant>.Update.Set(o => o.GuarantorID, null));
             }
 
-            if (ids.Count() == 1) return new RentleResponse("le guarant a été supprimer avec succés", true);
+            if (ids.Count() == 1) return new RentleResponse("le guarant a ï¿½tï¿½ supprimer avec succï¿½s", true);
 
-            return new RentleResponse("les guarants a été supprimer avec succés", true);
+            return new RentleResponse("les guarants a ï¿½tï¿½ supprimer avec succï¿½s", true);
         }
 
         public async Task<RentleResponse> Put(Guarantor guarantor)
         {
             await _guarantor.ReplaceOneAsync(g => g.ID == guarantor.ID, guarantor);
             Guarantor guarantorInserted = FindOne(guarantor.ID);
-            return new RentleResponse<Guarantor>("Le bien a été mis à jour", true, guarantorInserted);
+            return new RentleResponse<Guarantor>("Le bien a ï¿½tï¿½ mis ï¿½ jour", true, guarantorInserted);
         }
     }
 }

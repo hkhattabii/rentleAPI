@@ -12,7 +12,7 @@ namespace RentleAPI.Services
         public Occupant Occupant { get; set; }
         public Guarantor Guarantor { get; set; }
         public Property Property { get; set; }
-        public Lease? Lease { get; set; }
+        public Lease Lease { get; set; }
     }
     public class OccupantService : Service
     {
@@ -33,14 +33,11 @@ namespace RentleAPI.Services
             IEnumerable<OccupantJoined> query = (
                 from o in _occupant.AsQueryable().AsEnumerable()
                 join g in _guarantor.AsQueryable() on o.GuarantorID equals g.ID
-                into guarantorJoin
-                from guarantor in guarantorJoin.DefaultIfEmpty()
-                join p in _property.AsQueryable() on o.ID equals p.occupantID
-                into propertyJoin
-                from propertyLeased in propertyJoin.DefaultIfEmpty()
+                into guarantorJoin from guarantor in guarantorJoin.DefaultIfEmpty()
                 join l in _lease.AsQueryable() on o.ID equals l.OccupantID
-                into leaseJoin
-                from lease in leaseJoin.DefaultIfEmpty()
+                into leaseJoin from lease in leaseJoin.DefaultIfEmpty()
+                join p in _property.AsQueryable() on lease?.PropertyID equals p.ID
+                into propertyJoin from propertyLeased in propertyJoin.DefaultIfEmpty()
                 select new OccupantJoined { Occupant = o, Guarantor = guarantor, Property = propertyLeased, Lease = lease }
             );
 
@@ -97,7 +94,6 @@ namespace RentleAPI.Services
             foreach (string id in ids)
             {
                 Occupant occupant = await _occupant.FindOneAndDeleteAsync(o => o.ID == id);
-                await _guarantor.DeleteOneAsync(g => g.ID == occupant.GuarantorID);
             }
 
             if (ids.Count() == 1) return new RentleResponse("Le locataire a été supprimer avec succés", true);
