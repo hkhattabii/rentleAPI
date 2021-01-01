@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using RentleAPI.Models;
@@ -29,13 +30,21 @@ namespace RentleAPI.Controllers
             return await _leaseService.Create(lease);
         }
 
+        [HttpPost("GenerateContract")]
+        public void GenerateContract(GenBody genBody)
+        {
+            _leaseService.GenerateContract(genBody.id);
+        }
+
         [HttpPut]
-        public async Task<RentleResponse> Put(Lease lease) {
+        public async Task<RentleResponse> Put(Lease lease)
+        {
             return await _leaseService.Put(lease);
         }
 
         [HttpDelete]
-        public async Task<RentleResponse> Delete(IEnumerable<string> ids) {
+        public async Task<RentleResponse> Delete(IEnumerable<string> ids)
+        {
             return await _leaseService.Delete(ids);
         }
     }

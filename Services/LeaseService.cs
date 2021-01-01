@@ -3,15 +3,16 @@ using RentleAPI.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-
+using Aspose.Words;
+using Aspose.Words.Fields;
 namespace RentleAPI.Services
 {
-    public class LeaseJoined {
-        public Lease Lease {get; set;}
-        public Property Property {get; set;}
-        public Occupant Occupant {get ;set;}
+    public class LeaseJoined
+    {
+        public Lease Lease { get; set; }
+        public Property Property { get; set; }
+        public Occupant Occupant { get; set; }
     }
     public class LeaseService : Service
     {
@@ -26,7 +27,8 @@ namespace RentleAPI.Services
         }
 
 
-        public IEnumerable<LeaseJoined> Join() {
+        public IEnumerable<LeaseJoined> Join()
+        {
             IEnumerable<LeaseJoined> query = (
                 from l in _lease.AsQueryable().AsEnumerable()
                 join p in _property.AsQueryable() on l.PropertyID equals p.ID
@@ -37,11 +39,24 @@ namespace RentleAPI.Services
             return query;
         }
 
+        public IEnumerable<LeaseJoined> JoinOne(string id)
+        {
+            IEnumerable<LeaseJoined> query = (
+                from l in _lease.AsQueryable().AsEnumerable()
+                join p in _property.AsQueryable() on l.PropertyID equals p.ID
+                join o in _occupant.AsQueryable() on l.OccupantID equals o.ID
+                where l.ID == id
+                select new LeaseJoined { Lease = l, Property = p, Occupant = o }
+            );
+
+            return query;
+        }
+
         public List<Lease> Find(bool withouLease)
         {
             List<LeaseJoined> query = Join().ToList();
 
-    
+
 
             List<Lease> leases = new List<Lease>();
             for (int i = 0; i < query.Count; i++)
@@ -60,7 +75,7 @@ namespace RentleAPI.Services
         {
 
             List<Lease> leases = new List<Lease>();
-            
+
 
             var query = (
                 from l in _lease.AsQueryable().AsEnumerable()
@@ -79,7 +94,7 @@ namespace RentleAPI.Services
                 lease.IsFirstMonthPaid = query[i].Lease.DepositDate == null ? false : true;
                 leases.Add(lease);
             }
-            
+
 
 
             return leases;
@@ -87,13 +102,7 @@ namespace RentleAPI.Services
 
         public Lease FindOne(string id)
         {
-            var query = (
-                from l in _lease.AsQueryable().AsEnumerable()
-                join p in _property.AsQueryable() on l.PropertyID equals p.ID
-                join o in _occupant.AsQueryable() on l.OccupantID equals o.ID
-                where l.ID == id
-                select new { Lease = l, Property = p, Occupant = o }
-            ).Single();
+            LeaseJoined query = Join().FirstOrDefault();
 
             Lease lease = query.Lease;
             lease.Property = query.Property;
@@ -108,22 +117,28 @@ namespace RentleAPI.Services
 
         public async Task<RentleResponse> Create(Lease lease)
         {
-            try {
+            try
+            {
                 await _lease.InsertOneAsync(lease);
                 Lease leaseInserted = FindOne(lease.ID);
                 return new RentleResponse<Lease>("Le bail a été inséré avec succès !", true, leaseInserted);
             }
-            catch {
+            catch
+            {
                 return new RentleResponse("Une erreur interne est survenue", false);
             }
 
         }
-        public async Task<RentleResponse> Put(Lease lease) {
-            try {
+        public async Task<RentleResponse> Put(Lease lease)
+        {
+            try
+            {
                 await _lease.ReplaceOneAsync(l => l.ID == lease.ID, lease);
                 Lease leaseInserted = this.FindOne(lease.ID);
                 return new RentleResponse<Lease>("Le bail a été mis à jour", true, leaseInserted);
-            } catch {
+            }
+            catch
+            {
                 return new RentleResponse("Une erreur interne est survenue", false);
             }
         }
@@ -138,6 +153,32 @@ namespace RentleAPI.Services
             if (ids.Count() == 1) return new RentleResponse("Le bail a été supprimer avec succés", true);
             return new RentleResponse("Les baux ont bien été supprimé avec succés", true);
 
+        }
+
+        public void GenerateContract(string id)
+        {
+            string filename = "LEASE_CONTRACT-" + id + ".docx";
+            file = new Document();
+            fileBuilder = new DocumentBuilder(file);
+
+            Lease document = FindOne(id);
+            Dictionary<string, object> documentDIC = ToDictionnary(document);
+            insertField(documentDIC, document.GetType().Name);
+
+
+            foreach (string field in mergeFields)
+            {
+                fileBuilder.InsertTextInput("TextInput", TextFormFieldType.Regular, "", $"{field} : ", 0);
+                fileBuilder.InsertField($"MERGEFIELD {field}");
+                fileBuilder.InsertBreak(BreakType.LineBreak);
+            }
+
+
+            fileBuilder.Document.Save("merging-field-" + id + ".docx");
+            file.MailMerge.Execute(mergeFields.ToArray(), mergeValues.ToArray());
+            fileBuilder.Document.Save(filename);
+            mergeFields.Clear();
+            mergeValues.Clear();
         }
 
     }

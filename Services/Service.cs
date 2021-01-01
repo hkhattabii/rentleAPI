@@ -1,27 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Words;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using RentleAPI.Models;
 
 namespace RentleAPI.Services
 {
-    public enum DOC_TYPE
-    {
-        LEASE_CONTRACT,
-        GUARANTOR_DEPOSIT,
-        STATE_ENTRY,
-        STATE_EXIT,
-        EARLY_TERMINATION_LEASE,
-        LEASEHOLD_LEAVE
-    }
     public class Service
     {
-        private List<string> mergeFields;
-        private List<object> mergeValues;
-        private Document file;
-        private DocumentBuilder fileBuilder;
+        protected List<string> mergeFields;
+        protected List<object> mergeValues;
+        protected Document file;
+        protected DocumentBuilder fileBuilder;
         protected readonly IMongoDatabase _database;
 
 
@@ -36,37 +27,37 @@ namespace RentleAPI.Services
         public IMongoDatabase getDatabase()
         {
             return _database;
-        } 
+        }
 
-        public void generateDocument<T>(DOC_TYPE docType, T document, string id)
+        public void generateDocument(DOC_TYPE docType, string id)
         {
-            string filename = docType.ToString() + id + ".docx";
-            file = new Document();
-            fileBuilder = new DocumentBuilder(file);
 
-            Dictionary<string, object> documentDIC = document.ToBsonDocument().ToDictionary();
-
-            insertField(documentDIC, document.GetType().Name);
+            /*
+                        string filename = docType.ToString() + "-" + id + ".docx";
+                        file = new Document();
+                        fileBuilder = new DocumentBuilder(file);
 
 
 
 
+                        Dictionary<string, object> documentDIC = document.ToBsonDocument().ToDictionary();
+                        insertField(documentDIC, document.GetType().Name);
 
-            fileBuilder.Document.Save("Ouoh.docx");
-
-            file.MailMerge.Execute(mergeFields.ToArray(), mergeValues.ToArray());
-            fileBuilder.Document.Save(filename);
+                        fileBuilder.Document.Save("merging-field-" + id + ".docx");
+                        file.MailMerge.Execute(mergeFields.ToArray(), mergeValues.ToArray());
+                        fileBuilder.Document.Save(filename);
+            */
         }
 
 
-        private void insertField(Dictionary<string, object> dictionnary, string keyParent)
+        protected void insertField(Dictionary<string, object> dictionnary, string keyParent)
         {
 
             foreach (string key in dictionnary.Keys)
             {
 
                 object value = dictionnary.GetValueOrDefault(key);
-                if (value.GetType() == typeof(Dictionary<string, object>))
+                if (value != null && value.GetType() == typeof(Dictionary<string, object>))
                 {
                     insertField((Dictionary<string, object>)value, keyParent + "." + key);
                 }
@@ -77,6 +68,14 @@ namespace RentleAPI.Services
                     mergeValues.Add(value);
                 }
             }
+
+
+        }
+
+        public static Dictionary<string, object> ToDictionnary(object entity)
+        {
+            return entity.GetType().GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public)
+            .ToDictionary(prop => prop.Name, prop => prop.GetValue(entity, null));
         }
     }
 }

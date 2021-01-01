@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\hkhattabi\\Desktop\\COURS\\Q5\\WEB\\PROJET\\rentleAPI\\RentleAPI.csproj": {}
+    "C:\\Users\\Hkhattabi\\Desktop\\Cours\\Q5\\WEB\\rentleAPI\\RentleAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\hkhattabi\\Desktop\\COURS\\Q5\\WEB\\PROJET\\rentleAPI\\RentleAPI.csproj": {
+    "C:\\Users\\Hkhattabi\\Desktop\\Cours\\Q5\\WEB\\rentleAPI\\RentleAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\hkhattabi\\Desktop\\COURS\\Q5\\WEB\\PROJET\\rentleAPI\\RentleAPI.csproj",
+        "projectUniqueName": "C:\\Users\\Hkhattabi\\Desktop\\Cours\\Q5\\WEB\\rentleAPI\\RentleAPI.csproj",
         "projectName": "RentleAPI",
-        "projectPath": "C:\\Users\\hkhattabi\\Desktop\\COURS\\Q5\\WEB\\PROJET\\rentleAPI\\RentleAPI.csproj",
-        "packagesPath": "C:\\Users\\hkhattabi\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\hkhattabi\\Desktop\\COURS\\Q5\\WEB\\PROJET\\rentleAPI\\obj\\",
+        "projectPath": "C:\\Users\\Hkhattabi\\Desktop\\Cours\\Q5\\WEB\\rentleAPI\\RentleAPI.csproj",
+        "packagesPath": "C:\\Users\\Hkhattabi\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Hkhattabi\\Desktop\\Cours\\Q5\\WEB\\rentleAPI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\hkhattabi\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Hkhattabi\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -26,6 +26,7 @@
         },
         "frameworks": {
           "netcoreapp3.1": {
+            "targetAlias": "netcoreapp3.1",
             "projectReferences": {}
           }
         },
@@ -37,6 +38,7 @@
       },
       "frameworks": {
         "netcoreapp3.1": {
+          "targetAlias": "netcoreapp3.1",
           "dependencies": {
             "Aspose.Words": {
               "target": "Package",
@@ -73,7 +75,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
         }
       }
     }
