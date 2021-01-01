@@ -65,7 +65,7 @@ namespace RentleAPI.Services
                 lease.Property = query[i].Property;
                 lease.Occupant = query[i].Occupant;
                 lease.warranty = query[i].Property.Price * 2;
-                lease.IsFirstMonthPaid = query[i].Lease.DepositDate == null ? false : true;
+                lease.IsFirstMonthPaid = query[i].Lease.Deposit == 0 ? false : true;
                 leases.Add(lease);
             }
             return leases;
@@ -91,7 +91,7 @@ namespace RentleAPI.Services
                 lease.Property = query[i].Property;
                 lease.Occupant = query[i].Occupant;
                 lease.warranty = query[i].Property.Price * 2;
-                lease.IsFirstMonthPaid = query[i].Lease.DepositDate == null ? false : true;
+                lease.IsFirstMonthPaid = query[i].Lease.Deposit == 0 ? false : true;
                 leases.Add(lease);
             }
 
@@ -108,7 +108,7 @@ namespace RentleAPI.Services
             lease.Property = query.Property;
             lease.Occupant = query.Occupant;
             lease.warranty = query.Property.Price * 2;
-            lease.isDepositPaid = query.Lease.DepositDate == null ? false : true;
+            lease.isDepositPaid = query.Lease.Deposit == 0 ? false : true;
             return lease;
         }
 
@@ -157,7 +157,7 @@ namespace RentleAPI.Services
 
         public void GenerateContract(string id)
         {
-            string filename = "LEASE_CONTRACT-" + id + ".docx";
+            string filename = "./PRINT/LEASE_CONTRACT/LEASE_CONTRACT-" + id + ".docx";
             file = new Document();
             fileBuilder = new DocumentBuilder(file);
 
@@ -171,6 +171,35 @@ namespace RentleAPI.Services
                 fileBuilder.InsertTextInput("TextInput", TextFormFieldType.Regular, "", $"{field} : ", 0);
                 fileBuilder.InsertField($"MERGEFIELD {field}");
                 fileBuilder.InsertBreak(BreakType.LineBreak);
+            }
+
+
+            fileBuilder.Document.Save("merging-field-" + id + ".docx");
+            file.MailMerge.Execute(mergeFields.ToArray(), mergeValues.ToArray());
+            fileBuilder.Document.Save(filename);
+            mergeFields.Clear();
+            mergeValues.Clear();
+        }
+
+        public void GenerateGuarantorDeposit(string id)
+        {
+            string filename = "./PRINT/GUARANTOR_DEPOSIT/GUARANTOR_DEPOSIT-" + id + ".docx";
+            file = new Document();
+            fileBuilder = new DocumentBuilder(file);
+
+            Lease document = FindOne(id);
+            Dictionary<string, object> documentDIC = ToDictionnary(document);
+            insertField(documentDIC, document.GetType().Name);
+
+
+            foreach (string field in mergeFields)
+            {
+                if (field.Equals("Lease.Deposit"))
+                {
+                    fileBuilder.InsertTextInput("TextInput", TextFormFieldType.Regular, "", "Montant de la guarantie : ", 0);
+                    fileBuilder.InsertField($"MERGEFIELD {field} €");
+                    fileBuilder.InsertBreak(BreakType.LineBreak);
+                }
             }
 
 

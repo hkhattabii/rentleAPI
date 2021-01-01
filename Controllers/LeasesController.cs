@@ -36,6 +36,12 @@ namespace RentleAPI.Controllers
             _leaseService.GenerateContract(genBody.id);
         }
 
+        [HttpPost("GenerateGuarantorDeposit")]
+        public void GenerateGuarantorDeposit(GenBody genBody)
+        {
+            _leaseService.GenerateGuarantorDeposit(genBody.id);
+        }
+
         [HttpPut]
         public async Task<RentleResponse> Put(Lease lease)
         {

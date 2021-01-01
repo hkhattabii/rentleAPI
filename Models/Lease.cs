@@ -14,12 +14,12 @@ namespace RentleAPI.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string ID { get; set; }
-        
+
         [BsonRepresentation(BsonType.ObjectId)]
         public string PropertyID { get; set; }
 
         [BsonRepresentation(BsonType.ObjectId)]
-        public string OccupantID {get; set;}
+        public string OccupantID { get; set; }
 
         public DateTime BeginDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -31,17 +31,17 @@ namespace RentleAPI.Models
 
 
         [BsonIgnore]
-        public float warranty {get; set;}
+        public float warranty { get; set; }
         [BsonIgnore]
-        public bool isDepositPaid {get; set;} 
-        public DateTime? DepositDate { get; set; }
+        public bool isDepositPaid { get; set; }
+        public int Deposit { get; set; }
 
         public float Index { get; set; }
         public bool IsFirstMonthPaid { get; set; }
 
-        public Meter gasMeter {get; set;}
-        public Meter waterMeter {get; set;}
-        public Meter electricityMeter {get; set;}
+        public Meter gasMeter { get; set; }
+        public Meter waterMeter { get; set; }
+        public Meter electricityMeter { get; set; }
 
         [BsonDateTimeOptions]
         public DateTime? alarmDate { get; set; }
@@ -49,6 +49,6 @@ namespace RentleAPI.Models
         [BsonIgnore]
         public Property Property { get; set; }
         [BsonIgnore]
-        public Occupant Occupant {get; set;}
+        public Occupant Occupant { get; set; }
     }
 }
